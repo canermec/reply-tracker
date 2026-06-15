@@ -121,7 +121,10 @@
       background: #1a1500;
     }
 
-    button.undo-btn.hidden { display: none; }
+    button.undo-btn:disabled {
+      opacity: 0.25;
+      cursor: default;
+    }
 
     /* --- Stats section --- */
     .stats-header {
@@ -339,7 +342,7 @@
     <datalist id="handle-suggestions"></datalist>
     <button class="log-btn" onclick="logReply()">Log</button>
   </div>
-  <button class="undo-btn hidden" id="undo-btn" onclick="undoReply()">↩ Undo Last</button>
+  <button class="undo-btn" id="undo-btn" onclick="undoReply()" disabled>↩ Undo Last</button>
 </div>
 
 <div>
@@ -456,11 +459,9 @@
 
   function updateUndoBtn() {
     const data = getData();
-    document.getElementById('undo-btn').classList.toggle('hidden', data.length === 0);
-    if (data.length > 0) {
-      const last = data[data.length - 1];
-      document.getElementById('undo-btn').textContent = `↩ Undo @${last.handle}`;
-    }
+    const btn = document.getElementById('undo-btn');
+    btn.disabled = data.length === 0;
+    btn.textContent = data.length > 0 ? `↩ Undo @${data[data.length - 1].handle}` : '↩ Undo Last';
   }
 
   function undoReply() {
