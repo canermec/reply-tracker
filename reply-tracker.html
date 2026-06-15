@@ -100,6 +100,29 @@
       transform: scale(0.96);
     }
 
+    button.undo-btn {
+      width: 100%;
+      margin-top: 8px;
+      background: transparent;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      color: #555;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.3px;
+    }
+
+    button.undo-btn:active {
+      border-color: #D4AF37;
+      color: #D4AF37;
+      background: #1a1500;
+    }
+
+    button.undo-btn.hidden { display: none; }
+
     /* --- Stats section --- */
     .stats-header {
       display: flex;
@@ -316,6 +339,7 @@
     <datalist id="handle-suggestions"></datalist>
     <button class="log-btn" onclick="logReply()">Log</button>
   </div>
+  <button class="undo-btn hidden" id="undo-btn" onclick="undoReply()">↩ Undo Last</button>
 </div>
 
 <div>
@@ -430,6 +454,26 @@
       handles.map(h => `<option value="@${h}">`).join('');
   }
 
+  function updateUndoBtn() {
+    const data = getData();
+    document.getElementById('undo-btn').classList.toggle('hidden', data.length === 0);
+    if (data.length > 0) {
+      const last = data[data.length - 1];
+      document.getElementById('undo-btn').textContent = `↩ Undo @${last.handle}`;
+    }
+  }
+
+  function undoReply() {
+    const data = getData();
+    if (!data.length) return;
+    const removed = data.pop();
+    saveData(data);
+    updateSuggestions();
+    updateUndoBtn();
+    renderList();
+    showToast(`Removed @${removed.handle}`, 'neutral');
+  }
+
   function logReply() {
     const input = document.getElementById('handle-input');
     const raw = input.value.trim();
@@ -442,6 +486,7 @@
     saveData(data);
     input.value = '';
     updateSuggestions();
+    updateUndoBtn();
     renderList();
 
     const todayCount = data.filter(r => r.handle === handle && r.ts >= todayStart()).length;
@@ -456,6 +501,7 @@
     if (!confirm('Delete all logged replies? This cannot be undone.')) return;
     saveData([]);
     updateSuggestions();
+    updateUndoBtn();
     renderList();
     showToast('All data cleared', 'neutral');
   }
@@ -478,6 +524,7 @@
   });
 
   updateSuggestions();
+  updateUndoBtn();
   renderList();
 </script>
 </body>
